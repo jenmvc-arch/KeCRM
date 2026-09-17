@@ -66,13 +66,13 @@
                 <p class="form-help" id="connectionModeHelp">当前为演示模式。配置 Supabase 后可登录并读取真实数据库；WhatsApp、AI 与 Meta 仍需另行接入服务端。</p>
                 <div class="connection-row supabase-connection-row"><div class="connection-logo supabase">S</div><div class="connection-copy"><strong>Supabase 数据库</strong><span id="supabaseConnectionCopy">客户、广告、订单、审计与登录</span></div><span class="status-tag gray" id="supabaseStatusTag">未配置</span><button class="ghost-button small" id="toggleSupabasePanelBtn">配置</button></div>
                 <div class="supabase-panel" id="supabasePanel">
-                  <div class="supabase-panel-head"><div><strong>连接这个 CRM 到 Supabase</strong><span>只填写 Project URL 和 publishable / anon key。禁止填写 secret 或 service_role key。</span></div><span class="mode-chip" id="supabasePanelState">等待配置</span></div>
+                  <div class="supabase-panel-head"><div><strong>连接这个 CRM 到 Supabase</strong><span>本机推荐在 .env.local 填写 Project URL 和 publishable / anon key；以下输入仅作浏览器测试。禁止填写 secret 或 service_role key。</span></div><span class="mode-chip" id="supabasePanelState">等待配置</span></div>
                   <div class="supabase-config-grid">
                     <label>Project URL<input id="supabaseUrlInput" type="url" autocomplete="url" placeholder="https://your-project.supabase.co" /></label>
                     <label>Publishable / anon key<input id="supabaseKeyInput" type="password" autocomplete="off" placeholder="sb_publishable_... 或 anon JWT" /></label>
                   </div>
-                  <div class="supabase-actions"><button class="primary-button small" id="saveSupabaseConfigBtn">保存并测试</button><button class="ghost-button small" id="clearSupabaseConfigBtn">清除配置</button></div>
-                  <div class="connection-feedback" id="supabaseFeedback">配置保存在当前浏览器，不会写入 Git 或 CSV 导出。</div>
+                  <div class="supabase-actions"><button class="primary-button small" id="saveSupabaseConfigBtn">保存浏览器测试配置</button><button class="ghost-button small" id="clearSupabaseConfigBtn">清除浏览器覆盖</button></div>
+                  <div class="connection-feedback" id="supabaseFeedback">使用 python3 serve.py 时会优先读取 .env.local；页面配置不会写入 Git 或 CSV 导出。</div>
                   <button class="text-button supabase-guide-link" data-guide-target="supabase">查看完整 Supabase 接入教程 →</button>
 
                   <div class="supabase-auth" id="supabaseAuthLoggedOut">
@@ -104,7 +104,7 @@
                       <li class="guide-step"><span class="guide-step-no">2</span><div><strong>执行本系统的数据库迁移</strong><p>在 SQL Editor 完整运行 <code>supabase/migrations/20260917_000001_flowtrace_initial_schema.sql</code>；使用 Supabase CLI 的团队也可在已连接项目执行 <code>supabase db push</code>。迁移会建立客户、广告、来源历史、聊天、订单、AI 记录、Meta 队列、审计记录和 RLS 权限。</p><p class="guide-check">完成后核对：SQL 没有报错，Table Editor 能看到 CRM 数据表，Database Advisors 没有未处理的高风险安全提示。</p></div></li>
                       <li class="guide-step"><span class="guide-step-no">3</span><div><strong>取得浏览器可用的连接资料</strong><p>从项目的 Connect 对话框或 API Keys 页面复制 Project URL 与 <code>sb_publishable_...</code>。旧项目也可暂用 legacy anon key。不要复制 <code>sb_secret_...</code> 或 legacy <code>service_role</code>；这些高权限密钥会绕过 RLS，只能保存在服务端。</p><p class="guide-check">完成后核对：手上只有 Project URL 和 publishable / anon key，没有把服务端密钥放进网页、Git、聊天或 CSV。</p></div></li>
                       <li class="guide-step"><span class="guide-step-no">4</span><div><strong>配置邮箱登录规则</strong><p>在 Authentication 中启用 Email 登录并决定是否要求邮件确认。可以先在 Dashboard 建立老板账户，或稍后使用本页面的“创建账户”。若启用邮件确认，用户必须先完成验证才能登录。</p><p class="guide-check">完成后核对：测试邮箱可以登录，未验证账户的行为符合公司的安全要求。</p></div></li>
-                      <li class="guide-step"><span class="guide-step-no">5</span><div><strong>在 CRM 保存配置并建立公司空间</strong><p>回到上方 Supabase 面板，填写 Project URL 和 publishable / anon key，点击“保存并测试”，再用邮箱登录。首次登录时填写公司名称和默认币种并建立公司空间；当前账户会成为老板。</p><p class="guide-check">完成后核对：左侧状态显示“已连接”，页面显示 Supabase 在线数据；空数据库会明确显示暂无数据，不会混入本地模拟客户。</p></div></li>
+                      <li class="guide-step"><span class="guide-step-no">5</span><div><strong>用 .env.local 启动 CRM 并建立公司空间</strong><p>复制 <code>.env.example</code> 为 <code>.env.local</code>，填写 Project URL 和 publishable / anon key，再运行 <code>python3 serve.py</code>。打开页面后用邮箱登录；首次登录时填写公司名称和默认币种并建立公司空间，当前账户会成为老板。页面输入只用于临时浏览器测试。</p><p class="guide-check">完成后核对：连接提示显示配置来自 .env.local，左侧状态显示“已连接”；空数据库会明确显示暂无数据，不会混入本地模拟客户。</p></div></li>
                       <li class="guide-step"><span class="guide-step-no">6</span><div><strong>验证老板与销售权限</strong><p>老板应能查看公司资料和保存业务规则；销售只能查看及修改分配给自己的客户。广告来源记录在浏览器端为只读，只能由受信任的 WhatsApp Webhook 服务写入，避免人工伪造广告或点击识别码。</p><p class="guide-check">完成后核对：用老板和销售两个测试账户分别登录，确认销售无法看到未分配客户，也无法修改平台接入资料。</p></div></li>
                       <li class="guide-step"><span class="guide-step-no">7</span><div><strong>保持演示保护，逐项接入服务端</strong><p>新公司空间默认使用演示运行模式，订单可以保存在 Supabase，但 Meta 外发会被数据库标记为已拦截。完成 WhatsApp Webhook、AI 服务、订单同步和 Meta 队列工作器后，再由管理员通过受控部署流程切换正式环境。</p><p class="guide-check">完成后核对：演示订单没有发送到 Meta，所有真实平台密钥都只存在 Edge Function Secrets、Vault 或其他服务端 Secret Manager。</p></div></li>
                     </ol>
@@ -181,6 +181,7 @@
     </main>
   </div>
   <div id="toast" class="toast"></div><div id="modalRoot"></div>
+  <script src="runtime-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="supabase-client.js"></script>
   <script src="adapters.js"></script>

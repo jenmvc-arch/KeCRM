@@ -1040,8 +1040,16 @@ async function clearSupabaseConfig() {
   try { await api()?.signOut?.(); } catch (_) { /* Ignore logout failure while clearing local config. */ }
   api()?.clearLocalConfig?.();
   runtime.session = null;
-  $('#supabaseUrlInput').value = '';
   $('#supabaseKeyInput').value = '';
+  const remaining = statusData();
+  if (remaining.configured) {
+    $('#supabaseUrlInput').value = remaining.projectUrl || '';
+    const sourceLabel = remaining.source === 'environment' ? '.env.local' : '页面预设';
+    setConnectionFeedback(`已清除浏览器覆盖；继续使用 ${sourceLabel} 配置。`, 'success');
+    await refreshWorkspace({ quiet: true });
+    return;
+  }
+  $('#supabaseUrlInput').value = '';
   setConnectionFeedback('本机 Supabase 配置已清除。');
   setDemoMode('Supabase 尚未配置');
 }
@@ -1228,6 +1236,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAll();
   const storedStatus = statusData();
   if (storedStatus.projectUrl) $('#supabaseUrlInput').value = storedStatus.projectUrl;
+  if (storedStatus.source === 'environment') {
+    setConnectionFeedback('已从 .env.local 读取 Supabase Project URL 和浏览器 publishable key。', 'success');
+  }
   await refreshWorkspace({ quiet: true });
 });
 

@@ -5,22 +5,26 @@
 ## 运行
 
 ```bash
-python3 -m http.server 4173
+cp .env.example .env.local
+# 编辑 .env.local，填入 Supabase Project URL 和 publishable key
+python3 serve.py
 ```
 
-打开 `http://localhost:4173/`，或直接打开 `index.html`。
+打开 `http://127.0.0.1:4173/`。如果 `.env.local` 留空，系统仍会以模拟数据运行。
+
+请勿使用 `python3 -m http.server` 承载带有 `.env.local` 的目录；普通静态服务器可能直接暴露该文件。`serve.py` 只向浏览器注入白名单内的 Supabase URL、publishable/anon key 和可选 organization ID，并拒绝网页访问隐藏文件。直接打开 `index.html` 仍可查看演示版，但不会读取 `.env.local`。
 
 ## 连接 Supabase
 
 1. 在 Supabase 建立项目。
 2. 在 SQL Editor 运行 `supabase/migrations/20260917_000001_flowtrace_initial_schema.sql`，或在已连接的 Supabase CLI 项目执行 `supabase db push`。
 3. 在 Authentication 建立邮箱用户；也可以在本系统的「设置与接入 → 平台接入」创建账户。若项目要求邮箱确认，需先完成验证邮件。
-4. 在系统中填写 Project URL 与浏览器安全的 publishable key（旧项目可使用 anon key），然后登录。
+4. 将 Project URL 与浏览器安全的 publishable key（旧项目可使用 anon key）填入 `.env.local`，运行 `python3 serve.py`，然后在系统中登录。
 5. 首次登录选择「建立公司空间」。系统会创建老板权限和第一版业务规则，之后便会从 Supabase 读取客户、广告、订单和回传记录。
 
 浏览器会拒绝 `service_role` 和 `sb_secret_*`。WhatsApp、Meta、AI 及 Supabase 服务端密钥只能放在 Edge Function Secrets、Vault 或其他服务端 Secret Manager。
 
-浏览器数据适配层位于 `supabase-client.js`，详细 API 与字段映射见 `supabase/BROWSER_CLIENT.md`。通常直接在设置页面配置即可；若要使用被 Git 忽略的 `supabase-config.local.js`，请按该文档说明在适配层之前加载。
+浏览器数据适配层位于 `supabase-client.js`，详细 API 与字段映射见 `supabase/BROWSER_CLIENT.md`。设置页面仍可保存浏览器配置用于临时测试，但 `.env.local` 是本机开发的默认配置来源。
 
 ## 演示范围
 

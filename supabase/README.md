@@ -22,7 +22,7 @@ select public.create_organization('My Kitchen Business', 'MYR');
 
 This creates the organization, makes the current user its `owner`, and creates version 1 of the business rules with `deposit_paid` as the conversion standard.
 
-The CRM settings page performs this same operation through `FlowTraceSupabase.createOrganization(...)`. After applying the migration, open **设置与接入 → 平台接入**, enter the Project URL and publishable/anon key, sign in, and use **建立公司空间**. Do not place a `service_role` or secret key in the browser.
+The CRM settings page performs this same operation through `FlowTraceSupabase.createOrganization(...)`. After applying the migration, copy `.env.example` to `.env.local`, add the Project URL and publishable/anon key, run `python3 serve.py`, sign in, and use **建立公司空间**. Do not place a `service_role` or secret key in a browser-facing environment variable.
 
 ## Browser integration
 

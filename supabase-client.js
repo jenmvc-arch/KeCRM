@@ -131,10 +131,21 @@
     };
   }
 
+  function resolvedConfigEntry() {
+    if (runtimeConfig) return { value: runtimeConfig, source: 'runtime' };
+    if (global.FLOWTRACE_SUPABASE_CONFIG) {
+      return {
+        value: global.FLOWTRACE_SUPABASE_CONFIG,
+        source: global.FLOWTRACE_SUPABASE_CONFIG_SOURCE === '.env.local' ? 'environment' : 'global'
+      };
+    }
+    const stored = readLocalConfig();
+    if (stored) return { value: stored, source: 'localStorage' };
+    return { value: {}, source: 'none' };
+  }
+
   function resolveConfig() {
-    return normalizeConfig(
-      runtimeConfig || global.FLOWTRACE_SUPABASE_CONFIG || readLocalConfig() || {}
-    );
+    return normalizeConfig(resolvedConfigEntry().value);
   }
 
   function decodeJwtPayload(token) {
@@ -439,11 +450,13 @@
   function getStatus() {
     try {
       const config = validateConfig(resolveConfig());
+      const source = resolvedConfigEntry().source;
       return ok({
         configured: true,
         initialized: Boolean(client),
         projectUrl: config.url,
         organizationId: config.organizationId,
+        source,
         keyType: config.publishableKey.startsWith('sb_publishable_') ? 'publishable' : 'legacy-anon'
       }, client ? 'ready' : 'configured');
     } catch (error) {

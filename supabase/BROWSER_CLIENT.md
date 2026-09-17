@@ -4,14 +4,25 @@
 
 ## 加载与配置
 
-在 `app.js` 前加载适配层：
+本地开发使用仓库根目录的 `.env.local`：
+
+```dotenv
+SUPABASE_URL=https://PROJECT_REF.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+SUPABASE_ORGANIZATION_ID=
+```
+
+通过 `python3 serve.py` 启动。服务器会在内存中生成 `runtime-config.js`，只把这三个浏览器安全字段传给页面，并阻止访问 `.env.local`。不要用普通静态服务器承载包含 `.env.local` 的目录。
+
+脚本必须在 `app.js` 前按以下顺序加载：
 
 ```html
+<script src="runtime-config.js"></script>
 <script src="supabase-client.js"></script>
 <script src="app.js"></script>
 ```
 
-配置优先顺序为：`configure()` 的运行时配置、`window.FLOWTRACE_SUPABASE_CONFIG`、浏览器 `localStorage`。不必引用本地配置文件，设置页面可以直接保存：
+配置优先顺序为：`configure()` 的当前页面运行时配置、`.env.local` 注入的 `window.FLOWTRACE_SUPABASE_CONFIG`、浏览器 `localStorage`。设置页面也可以保存临时浏览器配置：
 
 ```js
 FlowTraceSupabase.saveLocalConfig({
@@ -21,7 +32,7 @@ FlowTraceSupabase.saveLocalConfig({
 });
 ```
 
-也可复制 `supabase-config.example.js` 为 `supabase-config.local.js` 并在适配层前加载。该本地文件已被 `.gitignore` 忽略。
+旧的静态方式仍可复制 `supabase-config.example.js` 为 `supabase-config.local.js` 并手动在适配层前加载，但本机开发建议统一使用 `.env.local` 和 `serve.py`。
 
 适配层会拒绝 `sb_secret_*`、JWT role 为 `service_role` 的密钥，以及无法识别为 publishable/anon 的密钥。Meta、WhatsApp、AI 与 Supabase `service_role` 密钥必须留在服务端 Secrets 中。
 
@@ -31,7 +42,7 @@ FlowTraceSupabase.saveLocalConfig({
 
 - `configure(config)`：只设置本次页面运行期间的配置。
 - `saveLocalConfig(config)` / `clearLocalConfig()`：保存或清除浏览器本地配置。
-- `getStatus()` / `init()`：检查配置、加载 supabase-js 并读取当前 session。
+- `getStatus()` / `init()`：检查配置、加载 supabase-js 并读取当前 session。`getStatus()` 会返回 `source`，用于区分 environment、浏览器配置和其他全局配置。
 - `getSession()` / `signInWithPassword(email, password)` / `signUpWithPassword(email, password)` / `signOut()`：邮箱注册、登录和退出。若项目启用了邮箱确认，注册后需先完成邮件验证。
 - `onAuthStateChange(callback)`：监听 session 变化，返回取消监听函数。
 - `loadCurrentContext()`：读取用户、profile、当前 organization 和 membership。

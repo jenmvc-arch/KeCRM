@@ -6,3 +6,4 @@
 .env.*
 !.env.example
 supabase-config.local.js
+__pycache__/
